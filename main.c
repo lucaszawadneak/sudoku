@@ -4,6 +4,7 @@
  *  Data:
  */
 #include <stdio.h>
+#include <string.h>
 
 #define TAMANHO 9
 #define POSSIVEIS [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
@@ -55,23 +56,23 @@ void showSudoku(int mat[][TAMANHO])
     }
 }
 
-void findMissingColumn(int mat[][TAMANHO], int pos)
+void invalidInColumn(int mat[][TAMANHO], int pos)
 {
-    int i, j, k;
-    int invalidos[9];
+    int i, value, k;
+    int invalid[9];
 
-    for (j = 1; j <= TAMANHO; j++)
+    for (value = 1; value <= TAMANHO; value++)
     {
         for (i = 0; i < TAMANHO; i++)
         {
-            if (j == mat[i][pos])
+            if (value == mat[i][pos])
             {
                 for (k = 0; 0 == 0; k++)
                 {
-                    if (invalidos[k] == '\0')
+                    if (invalid[k] == '\0')
                     {
-                        invalidos[k + 1] = '\0';
-                        invalidos[k] = mat[i][pos];
+                        invalid[k + 1] = '\0';
+                        invalid[k] = value;
                         break;
                     }
                 }
@@ -81,23 +82,24 @@ void findMissingColumn(int mat[][TAMANHO], int pos)
     }
 }
 
-void findMissingLine(int mat[][TAMANHO], int pos)
+void invalidInLine(int mat[][TAMANHO], int pos)
 {
-    int i, j, k;
-    int invalidos[9];
+    int i, value, k;
+    int invalid[9];
 
-    for (j = 1; j <= TAMANHO; j++)
+    for (value = 1; value <= TAMANHO; value++)
     {
         for (i = 0; i < TAMANHO; i++)
         {
-            if (j == mat[pos][i])
+            if (value == mat[pos][i])
             {
                 for (k = 0; 0 == 0; k++)
                 {
-                    if (invalidos[k] == '\0')
+                    if (invalid[k] == '\0')
                     {
-                        invalidos[k + 1] = '\0';
-                        invalidos[k] = mat[pos][i];
+                        invalid[k + 1] = '\0';
+                        invalid[k] = value;
+                        printf("%i - ", invalid[k]);
                         break;
                     }
                 }
@@ -107,8 +109,36 @@ void findMissingLine(int mat[][TAMANHO], int pos)
     }
 }
 
-void findMissingGroup()
+void invalidInGroup(int mat[][TAMANHO], int groupLine, int groupCol)
 {
+    int i, j, k, value;
+    int invalid[9];
+    int linePosition = groupLine * 3;
+    int columnPosition = groupCol * 3;
+
+    for (value = 1; value <= TAMANHO; value++)
+    {
+        for (i = linePosition; i <= linePosition + 2; i++)
+        {
+            for (j = columnPosition; j <= columnPosition + 2; j++)
+            {
+                // printf("%i - ", mat[i][j]);
+                if (mat[i][j] == value)
+                {
+                    for (k = 0; 0 == 0; k++)
+                    {
+                        if (invalid[k] == '\0')
+                        {
+                            invalid[k + 1] = '\0';
+                            invalid[k] = value;
+                            printf("%i - ", invalid[k]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 int findMatch(int mat[][TAMANHO], int line, int col, int groupLine, int groupCol)
@@ -154,13 +184,12 @@ int main()
     // copia os valores de jogoInicial para solucao
     memcpy(solucao, jogoInicial, sizeof(int) * 81);
 
-    printf("Configuracao inicial do jogo:\n");
+    // printf("Configuracao inicial do jogo:\n");
     showSudoku(solucao);
 
-    findMissingColumn(solucao, 0);
-
-    printf("%s", "\nSolução:\n");
-    solveGame(solucao);
+    invalidInGroup(solucao, 0, 0);
+    // printf("%s", "\nSolução:\n");
+    // solveGame(solucao);
 
     return 0;
 }
