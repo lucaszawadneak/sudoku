@@ -1,13 +1,12 @@
 /*
  *  Trabalho 1 - Passos para resolver o sudoku
- *  Autor:
- *  Data:
+ *  Autor: Lucas Cassilha Zawadneak
+ *  Data: Janeiro 2021
  */
 #include <stdio.h>
 #include <string.h>
 
 #define TAMANHO 9
-#define POSSIVEIS [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 
 // void inicializaVetor(int v[], int tam)
 // {
@@ -56,10 +55,10 @@ void showSudoku(int mat[][TAMANHO])
     }
 }
 
-void invalidInColumn(int mat[][TAMANHO], int pos)
+int *invalidInColumn(int mat[][TAMANHO], int pos)
 {
     int i, value, k;
-    int invalid[9];
+    static int invalid[10];
 
     for (value = 1; value <= TAMANHO; value++)
     {
@@ -67,25 +66,30 @@ void invalidInColumn(int mat[][TAMANHO], int pos)
         {
             if (value == mat[i][pos])
             {
+                // printf("Valores coluna %i: ", pos);
                 for (k = 0; 0 == 0; k++)
                 {
                     if (invalid[k] == '\0')
                     {
                         invalid[k + 1] = '\0';
                         invalid[k] = value;
+                        // printf("%i ", value);
                         break;
                     }
                 }
+                // printf("\n");
                 break;
             }
         }
     }
+
+    return invalid;
 }
 
-void invalidInLine(int mat[][TAMANHO], int pos)
+int *invalidInLine(int mat[][TAMANHO], int pos)
 {
     int i, value, k;
-    int invalid[9];
+    static int invalid[10];
 
     for (value = 1; value <= TAMANHO; value++)
     {
@@ -99,7 +103,6 @@ void invalidInLine(int mat[][TAMANHO], int pos)
                     {
                         invalid[k + 1] = '\0';
                         invalid[k] = value;
-                        printf("%i - ", invalid[k]);
                         break;
                     }
                 }
@@ -107,12 +110,14 @@ void invalidInLine(int mat[][TAMANHO], int pos)
             }
         }
     }
+
+    return invalid;
 }
 
-void invalidInGroup(int mat[][TAMANHO], int groupLine, int groupCol)
+int *invalidInGroup(int mat[][TAMANHO], int groupLine, int groupCol)
 {
     int i, j, k, value;
-    int invalid[9];
+    static int invalid[10];
     int linePosition = groupLine * 3;
     int columnPosition = groupCol * 3;
 
@@ -125,13 +130,14 @@ void invalidInGroup(int mat[][TAMANHO], int groupLine, int groupCol)
                 // printf("%i - ", mat[i][j]);
                 if (mat[i][j] == value)
                 {
+
                     for (k = 0; 0 == 0; k++)
                     {
                         if (invalid[k] == '\0')
                         {
                             invalid[k + 1] = '\0';
                             invalid[k] = value;
-                            printf("%i - ", invalid[k]);
+                            // printf("%i ", value);
                             break;
                         }
                     }
@@ -139,27 +145,57 @@ void invalidInGroup(int mat[][TAMANHO], int groupLine, int groupCol)
             }
         }
     }
+
+    return invalid;
 }
 
-int findMatch(int mat[][TAMANHO], int line, int col, int groupLine, int groupCol)
+void findMatch(int mat[][TAMANHO], int line, int col)
 {
-    int lineMatches, colMatches, groupMatches;
+    int i, j, lineMatches, colMatches;
+    static int possibleNumbers[10];
+    int *lineInvalid;
+    int *columnInvalid;
+    int *groupInvalid;
 
-    return 0;
+    int groupLine = (line) / 3;
+    int groupCol = (col) / 3;
+
+    lineInvalid = invalidInLine(mat, line);
+    columnInvalid = invalidInColumn(mat, col);
+    groupInvalid = invalidInGroup(mat, groupLine, groupCol);
+
+    int valid = 1, value;
+    for (j = 1; j <= TAMANHO; j++)
+    {
+        valid = 0;
+        for (i = 0; i < TAMANHO; i++)
+        {
+            // printf("%i %i %i - %i\n", *(lineInvalid + i), *(columnInvalid + i), *(groupInvalid + i), j);
+            if (*(lineInvalid + i) == j || *(columnInvalid + i) == j || *(groupInvalid + i) == j)
+            {
+                // printf("%i ", j);
+                valid = 1;
+                continue;
+            }
+        }
+        // printf("%i ", valid);
+        if (valid == 0)
+        {
+            printf("%i ", j);
+        }
+    }
 }
 
 int solveGame(int mat[][TAMANHO])
 {
-    int line, col, groupLine, groupCol, value;
+    int line, col, value;
     // [LINHA,COLUNA];
     // GROUP = QUADRADOS MENORES DO SUDOKU (DE 1 a 9)
     for (line = 1; line <= TAMANHO; line++)
     {
-        groupLine = (line - 1) / 3;
         for (col = 1; col <= TAMANHO; col++)
         {
             // printf("%i\n", mat[line][col]);
-            // groupCol = (col - 1) / 3;
             // mat[line][col] = findMatch(mat, line, col, groupLine, groupCol);
         }
     }
@@ -184,10 +220,11 @@ int main()
     // copia os valores de jogoInicial para solucao
     memcpy(solucao, jogoInicial, sizeof(int) * 81);
 
+    findMatch(solucao, 3, 3);
+
     // printf("Configuracao inicial do jogo:\n");
     showSudoku(solucao);
 
-    invalidInGroup(solucao, 0, 0);
     // printf("%s", "\nSolução:\n");
     // solveGame(solucao);
 
