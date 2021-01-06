@@ -8,22 +8,6 @@
 
 #define TAMANHO 9
 
-// void inicializaVetor(int v[], int tam)
-// {
-//     int i;
-//     for (i = 0; i < tam; i++)
-//     {
-//         v[i] = 0;
-//     }
-// }
-
-// void inicializa3Vetor(int v1[], int v2[], int v3[], int tam)
-// {
-//     inicializaVetor(v1, tam);
-//     inicializaVetor(v2, tam);
-//     inicializaVetor(v3, tam);
-// }
-
 void showSudoku(int mat[][TAMANHO])
 {
     int i, j;
@@ -149,9 +133,9 @@ int *invalidInGroup(int mat[][TAMANHO], int groupLine, int groupCol)
     return invalid;
 }
 
-void findMatch(int mat[][TAMANHO], int line, int col)
+int findMatch(int mat[][TAMANHO], int line, int col)
 {
-    int i, j, lineMatches, colMatches;
+    int i, j, lineMatches, colMatches, matchNumber = 0;
     static int possibleNumbers[10];
     int *lineInvalid;
     int *columnInvalid;
@@ -175,36 +159,173 @@ void findMatch(int mat[][TAMANHO], int line, int col)
             {
                 // printf("%i ", j);
                 valid = 1;
-                continue;
+                break;
             }
         }
         // printf("%i ", valid);
         if (valid == 0)
         {
+            matchNumber++;
             printf("%i ", j);
+        }
+    }
+    printf("\n");
+    return matchNumber;
+}
+
+void solveGame(int mat[][TAMANHO])
+{
+    int array[9][9];
+    int line, col, value;
+
+    memcpy(array, mat, sizeof(int) * 81);
+
+    for (line = 0; line < TAMANHO; line++)
+    {
+        for (col = 0; col < TAMANHO; col++)
+        {
+            if (array[line][col] != 0)
+            {
+                continue;
+            }
+            findMatch(array, line, col);
+            // printf("%i ", array[line][col]);
         }
     }
 }
 
-int solveGame(int mat[][TAMANHO])
+void printReverse(int array[9])
 {
-    int line, col, value;
-    // [LINHA,COLUNA];
-    // GROUP = QUADRADOS MENORES DO SUDOKU (DE 1 a 9)
-    for (line = 1; line <= TAMANHO; line++)
+    int i, j, valid;
+    printf("Valores válidos:\n");
+    for (j = 1; j <= 9; j++)
     {
-        for (col = 1; col <= TAMANHO; col++)
+        valid = 0;
+        for (i = 0; i < 9; i++)
         {
-            // printf("%i\n", mat[line][col]);
-            // mat[line][col] = findMatch(mat, line, col, groupLine, groupCol);
+            // printf("%i %i\n", i, j);
+            if (j == array[i])
+            {
+                valid = 1;
+                break;
+            }
+        }
+        if (valid == 0)
+        {
+            printf("%i ", j);
+        }
+    }
+    printf("\n");
+}
+
+void print(int array[9])
+{
+    int i;
+
+    for (i = 0; i < 9; i++)
+    {
+        if (array[i] != '\0' && array[i] != 0)
+        {
+            printf("%i ", array[i]);
+        }
+    }
+}
+
+void sudokuMenu(int mat[][TAMANHO])
+{
+    int question = 0, line, column, *aux;
+
+    printf("\nEscolha uma opção:\n");
+    printf("1. Quais valores faltam na linha X?\n");
+    printf("2. Quais valores faltam na coluna Y?\n");
+    printf("3. Quais valores faltam no grupo Z?\n");
+    printf("4. Quais valores determinada célula pode conter?\n");
+    printf("5. Quais valores determinada célula não pode conter?\n");
+
+    while (question == 0)
+    {
+        scanf("%i", &question);
+        if (question > 6 || question < 1)
+        {
+            question = 0;
+            printf("Valor inválido!\n");
         }
     }
 
-    showSudoku(mat);
+    switch (question)
+    {
+    case 1:
+        printf("Linha:\n");
+        scanf("%i", &line);
+        if (line < 1 || line > 9)
+        {
+            printf("Valor inválido!\n");
+            sudokuMenu(mat);
+            break;
+        }
+        aux = invalidInLine(mat, line - 1);
+        printReverse(aux);
+        break;
+    case 2:
+        printf("Coluna:\n");
+        scanf("%i", &column);
+        if (column < 1 || column > 9)
+        {
+            printf("Valor inválido!\n");
+            sudokuMenu(mat);
+            break;
+        }
+        aux = invalidInColumn(mat, column - 1);
+        printReverse(aux);
+        break;
+    case 3:
+        printf("Linha:\n");
+        scanf("%i", &line);
+        if (line < 1 || line > 9)
+        {
+            printf("Valor inválido!\n");
+            sudokuMenu(mat);
+            break;
+        }
+        printf("Coluna:\n");
+        scanf("%i", &column);
+        if (column < 1 || column > 9)
+        {
+            printf("Valor inválido!\n");
+            sudokuMenu(mat);
+            break;
+        }
+        aux = invalidInGroup(mat, (line - 1) / 3, (column - 1) / 3);
+        printReverse(aux);
+        break;
+    case 4:
+        printf("Linha:\n");
+        scanf("%i", &line);
+        printf("Coluna:\n");
+        scanf("%i", &column);
+        printf("Valores possíveis (%ix%i):\n", line, column);
+        aux = findMatch(mat, line - 1, column - 1);
+        printf("Número de possíveis: %i\n", aux);
+        break;
+    case 5:
+        printf("Linha:\n");
+        scanf("%i", &line);
+        printf("Coluna:\n");
+        scanf("%i", &column);
+        printf("Valores não possíveis (%ix%i):\n", line, column);
+        findMatch(mat, line - 1, column - 1);
+        break;
+        break;
+    case 6:
+        break;
+    default:
+        break;
+    }
 }
 
 int main()
 {
+    int question = 0;
     int jogoInicial[9][9] = {{9, 4, 0, 1, 0, 2, 0, 5, 8},
                              {6, 0, 0, 0, 5, 0, 0, 0, 4},
                              {0, 0, 2, 4, 0, 3, 1, 0, 0},
@@ -216,16 +337,19 @@ int main()
                              {4, 3, 0, 5, 0, 9, 0, 1, 2}};
     int solucao[9][9];
     int linha[9], coluna[9], grupo[9], i, j;
+    int value;
 
     // copia os valores de jogoInicial para solucao
     memcpy(solucao, jogoInicial, sizeof(int) * 81);
 
-    findMatch(solucao, 3, 3);
+    // findMatch(solucao, 3, 3);
 
-    // printf("Configuracao inicial do jogo:\n");
+    printf("Configuracao inicial do jogo:\n");
     showSudoku(solucao);
 
-    // printf("%s", "\nSolução:\n");
+    sudokuMenu(solucao);
+
+    // printf("\nSolução:\n");
     // solveGame(solucao);
 
     return 0;
