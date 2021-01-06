@@ -173,25 +173,41 @@ int findMatch(int mat[][TAMANHO], int line, int col)
     return matchNumber;
 }
 
-void solveGame(int mat[][TAMANHO])
+void findNotMatch(int mat[][TAMANHO], int line, int col)
 {
-    int array[9][9];
-    int line, col, value;
+    int i, j, lineMatches, colMatches;
+    int *lineInvalid;
+    int *columnInvalid;
+    int *groupInvalid;
 
-    memcpy(array, mat, sizeof(int) * 81);
+    int groupLine = (line) / 3;
+    int groupCol = (col) / 3;
 
-    for (line = 0; line < TAMANHO; line++)
+    lineInvalid = invalidInLine(mat, line);
+    columnInvalid = invalidInColumn(mat, col);
+    groupInvalid = invalidInGroup(mat, groupLine, groupCol);
+
+    int valid = 1, value;
+    for (j = 1; j <= TAMANHO; j++)
     {
-        for (col = 0; col < TAMANHO; col++)
+        valid = 1;
+        for (i = 0; i < TAMANHO; i++)
         {
-            if (array[line][col] != 0)
+            // printf("%i %i %i - %i\n", *(lineInvalid + i), *(columnInvalid + i), *(groupInvalid + i), j);
+            if (*(lineInvalid + i) == j || *(columnInvalid + i) == j || *(groupInvalid + i) == j)
             {
-                continue;
+                // printf("%i ", j);
+                valid = 0;
+                break;
             }
-            findMatch(array, line, col);
-            // printf("%i ", array[line][col]);
+        }
+        // printf("%i ", valid);
+        if (valid == 0)
+        {
+            printf("%i ", j);
         }
     }
+    printf("\n");
 }
 
 void printReverse(int array[9])
@@ -245,7 +261,7 @@ void sudokuMenu(int mat[][TAMANHO])
     while (question == 0)
     {
         scanf("%i", &question);
-        if (question > 6 || question < 1)
+        if (question > 5 || question < 1)
         {
             question = 0;
             printf("Valor inválido!\n");
@@ -313,10 +329,8 @@ void sudokuMenu(int mat[][TAMANHO])
         printf("Coluna:\n");
         scanf("%i", &column);
         printf("Valores não possíveis (%ix%i):\n", line, column);
-        findMatch(mat, line - 1, column - 1);
+        findNotMatch(mat, line - 1, column - 1);
         break;
-        break;
-    case 6:
         break;
     default:
         break;
@@ -339,18 +353,12 @@ int main()
     int linha[9], coluna[9], grupo[9], i, j;
     int value;
 
-    // copia os valores de jogoInicial para solucao
     memcpy(solucao, jogoInicial, sizeof(int) * 81);
-
-    // findMatch(solucao, 3, 3);
 
     printf("Configuracao inicial do jogo:\n");
     showSudoku(solucao);
 
     sudokuMenu(solucao);
-
-    // printf("\nSolução:\n");
-    // solveGame(solucao);
 
     return 0;
 }
